@@ -1,0 +1,14 @@
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%highlight([%level]) - [%date] - [%logger] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.knoldus" level="info">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+    <root level="error">
+        <appender-ref ref="EMAIL" />
+    </root>
+</configuration>
