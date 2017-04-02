@@ -20,7 +20,7 @@ For more details please check [Twitter's tweets analysis using Lambda Architectu
 * Before start the project we need to start kafka and cassandra.
 * Execute `sbt clean compile` to build the product
 * Execute `sbt run` to execute the project it will show you multiple option.
-* We need to  first start 'TwitterStreamApp' to fetch tweets from twitter, then start 'CassandraKafkaConsumer' which is         responsible for fetch data from kafka and put into master dataset.After that we can start 'SparkStreamingKafkaConsumer' for   realtime view and 'BatchProcessor' for batch view.There is onther app 'AkkaHttpServer' which is responsible for serving       layer.Basically it merges realtime and batch view against pre specified query and retrun result back to web client.
+* We need to  first start **TwitterStreamApp** to fetch tweets from twitter, then start **CassandraKafkaConsumer** which is     responsible for fetch data from kafka and put into master dataset.After that we can start **SparkStreamingKafkaConsumer**     for realtime view and **BatchProcessor** for batch view.There is onther app **AkkaHttpServer** which is responsible for       serving layer.Basically it merges realtime and batch view against pre specified query and retrun result back to web client.
 
 -----------------------------------------------------------------------
 ### References
