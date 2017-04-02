@@ -15,7 +15,7 @@ object KafkaCassandraConfigUtil {
   val accessTokenSecret = config.getString("app.accessTokenSecret")
   val port = config.getInt("cassandra.port")
   val hosts = config.getStringList("cassandra.hosts").toList
-  val cassandraKeyspace = config.getString("cassandra.keyspace")
+  val cassandraKeyspaces = config.getStringList("cassandra.keyspaces")
   val replicationFactor = config.getString("cassandra.replication_factor").toInt
   val readConsistency = config.getString("cassandra.read_consistency")
   val writeConsistency = config.getString("cassandra.write_consistency")
