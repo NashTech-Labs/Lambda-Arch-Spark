@@ -3,11 +3,12 @@ package com.knoldus.kafka.producer
 import java.util.{Properties, Random}
 
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 object KafkaTwitterProducer {
 
-  val logger = LoggerFactory.getLogger(this.getClass)
+  val logger: Logger = LoggerFactory.getLogger(this.getClass)
+
   private val props = new Properties()
   val maxRetries:Integer = 3
   val batchSize :Integer= 1638
@@ -27,17 +28,12 @@ object KafkaTwitterProducer {
 
   /**
     * Send message to kafka queue
-    *
-    * @param topic
-    * @param message
-    * @param mode
-    * @return
     */
   def send(topic: String, message: String, mode: String = "default"): Boolean = {
     try {
       println("sending message  to kafka queue.......")
       val partition = rnd.nextInt(4).toString
-       producer.send(new ProducerRecord[String, String](topic, partition, message))
+      producer.send(new ProducerRecord[String, String](topic, partition, message))
       true
     } catch {
       case ex: Exception =>
@@ -47,4 +43,3 @@ object KafkaTwitterProducer {
   }
 
 }
-

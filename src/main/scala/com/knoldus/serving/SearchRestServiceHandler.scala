@@ -10,14 +10,11 @@ import scala.concurrent.duration.DurationInt
 
 trait SearchRestServiceHandler extends JsonHelper  with LoggerUtil {
 
-  implicit val timeout = Timeout(40 seconds)
-
-
+  implicit val timeout: Timeout = Timeout(40.seconds)
 
   def getTwitterUserByFriendCount(minute: String, second: String): Future[String] = {
     Future(write(CassandraOperation.findTwitterUsers(minute.toLong,second.toLong)))
   }
-
 
 }
 

@@ -1,16 +1,15 @@
 package com.knoldus.kafka.consumer
 
-
 import com.datastax.driver.core._
 import com.knoldus.util.KafkaCassandraConfigUtil._
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 trait CassandraConnection {
 
-  val logger = LoggerFactory.getLogger(getClass.getName)
-  val defaultConsistencyLevel = ConsistencyLevel.valueOf(writeConsistency)
+  val logger: Logger = LoggerFactory.getLogger(getClass.getName)
+  val defaultConsistencyLevel: ConsistencyLevel = ConsistencyLevel.valueOf(writeConsistency)
   val cassandraConn: Session = {
-    val cluster = new Cluster.Builder().withClusterName("Test Cluster").
+    val cluster = new Cluster.Builder().withClusterName("Test Cluster").withoutJMXReporting().
       addContactPoints(hosts.toArray: _*).
       withPort(port).
       withQueryOptions(new QueryOptions().setConsistencyLevel(defaultConsistencyLevel)).build
@@ -28,7 +27,7 @@ trait CassandraConnection {
   }
 
   val cassandraConn1: Session = {
-    val cluster = new Cluster.Builder().withClusterName("Test Cluster").
+    val cluster = new Cluster.Builder().withClusterName("Test Cluster").withoutJMXReporting().
       addContactPoints(hosts.toArray: _*).
       withPort(port).
       withQueryOptions(new QueryOptions().setConsistencyLevel(defaultConsistencyLevel)).build
@@ -44,7 +43,7 @@ trait CassandraConnection {
   }
 
   val cassandraConn2: Session = {
-    val cluster = new Cluster.Builder().withClusterName("Test Cluster").
+    val cluster = new Cluster.Builder().withClusterName("Test Cluster").withoutJMXReporting().
       addContactPoints(hosts.toArray: _*).
       withPort(port).
       withQueryOptions(new QueryOptions().setConsistencyLevel(defaultConsistencyLevel)).build
