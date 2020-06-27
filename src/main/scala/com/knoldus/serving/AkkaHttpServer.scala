@@ -6,13 +6,14 @@ import akka.stream.ActorMaterializer
 import org.fusesource.jansi.Ansi.Color._
 import org.fusesource.jansi.Ansi._
 
+import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
 
 object AkkaHttpServer extends App with SearchRestService {
 
-  implicit val system = ActorSystem("search")
-  implicit val materializer = ActorMaterializer()
-  implicit val ec = system.dispatcher
+  implicit val system: ActorSystem = ActorSystem("search")
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val ec: ExecutionContextExecutor = system.dispatcher
 
 
   val binding = Http().bindAndHandle(routes, "localhost", 9000)

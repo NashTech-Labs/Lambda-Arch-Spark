@@ -1,12 +1,13 @@
 package com.knoldus.kafka.producer
 
-import java.util.Date
 import java.util.concurrent.LinkedBlockingQueue
 
 import com.knoldus.util.{JsonHelper, KafkaCassandraConfigUtil}
 import twitter4j._
 import twitter4j.conf.ConfigurationBuilder
-case class Tweet(tweetId:Long,createdAt:Long,userId:Long,tweetUserName: String,countryName: String,friendsCount:Long)
+
+case class Tweet(tweetId: Long, createdAt: Long, userId: Long, tweetUserName: String, countryName: String, friendsCount: Long)
+
 object TwitterStreamApp extends App with JsonHelper{
 
 
@@ -15,7 +16,7 @@ object TwitterStreamApp extends App with JsonHelper{
   val boundingBox: Array[Double] = Array(-180.0,-90.0)
   val boundingBox1: Array[Double] = Array(180.0,90.0)
 
-  val keyWords = "narendramodi"
+  val keyWords = "covid19"
 
   val cb = new ConfigurationBuilder()
   cb.setDebugEnabled(true)
@@ -41,9 +42,7 @@ object TwitterStreamApp extends App with JsonHelper{
 
     }
 
-    override def onDeletionNotice(statusDeletion_Notice: StatusDeletionNotice) = {
-
-    }
+    override def onDeletionNotice(statusDeletion_Notice: StatusDeletionNotice): Unit = {}
 
     override def onTrackLimitationNotice(numberOfLimitedStatuses: Int) {
       // System.out.println("Got track limitation notice:" +num-berOfLimitedStatuses);
@@ -61,6 +60,7 @@ object TwitterStreamApp extends App with JsonHelper{
       ex.printStackTrace()
     }
   }
+
   twitterStream.addListener(listener)
 
   val query = new FilterQuery().track(keyWords)
@@ -68,8 +68,6 @@ object TwitterStreamApp extends App with JsonHelper{
   query.locations(boundingBox,boundingBox1)
   twitterStream.filter(query)
 
-
   Thread.sleep(100000000)
-
 
 }

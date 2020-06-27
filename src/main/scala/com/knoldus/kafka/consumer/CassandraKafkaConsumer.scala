@@ -1,20 +1,24 @@
 package com.knoldus.kafka.consumer
 
-
 import java.util.Properties
 
+import scala.collection.JavaConversions._
 import akka.actor._
-import kafka.consumer.{Consumer, ConsumerConfig, ConsumerIterator, ConsumerTimeoutException}
+import org.apache.kafka.clients.consumer.ConsumerRecord
 
-class KafkaConsumer {
+import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.duration.FiniteDuration
 
+import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
+import scala.concurrent.duration.DurationInt
+
+class KafkaMessageConsumer {
 
   private val props = new Properties
   props.put("group.id", "batch_consumer")
-  //props.put("bootstrap.servers", "localhost:9092")
+  props.put("bootstrap.servers", "localhost:9092")
   props.put("zookeeper.connect", "localhost:2181")
   props.put("enable.auto.commit", "true")
-  props.put("auto.offset.reset", "smallest")
   props.put("consumer.timeout.ms", "500")
   props.put("auto.commit.interval.ms", "1000")
   props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
@@ -23,64 +27,33 @@ class KafkaConsumer {
   private val noOfStreams = 1
   private val batchSize = 100
   private val topic = "tweets"
-  private val consumerConnector = Consumer.create(new ConsumerConfig(props))
+  private val consumerConnector = new KafkaConsumer[String, String](props)
 
-  private val iterator: ConsumerIterator[Array[Byte], Array[Byte]] = consumerConnector.createMessageStreams(Map(topic -> noOfStreams)).mapValues(_.head)(topic).iterator()
+  consumerConnector.subscribe(java.util.Collections.singletonList(topic))
 
-  def read =
-    try {
-      if (iterator.hasNext()) {
-        println("Got message   ::::::::::::::::::: ")
-        readBatchFromTopic(topic, iterator)
-      }
-    } catch {
-      case timeOutEx: ConsumerTimeoutException =>
-        println("$$$Getting time out  when reading message")
-      case ex: Exception =>
-        println(s"Not getting message from ", ex)
+  def readAndProcess(): Unit = {
+    val records = consumerConnector.poll(java.time.Duration.ofSeconds(1))
+    records.iterator().foreach { record =>
+      CassandraOperation.insertTweets(List(record.value()))
     }
-
-
-  private def readBatchFromTopic(topic: String, iterator: ConsumerIterator[Array[Byte], Array[Byte]]) = {
-    var batch = List.empty[String]
-    while (hasNext(iterator) && batch.size < batchSize) {
-      batch = batch :+ (new String(iterator.next().message()))
-    }
-    if (batch.isEmpty) throw new IllegalArgumentException(s"$topic is  empty")else{ CassandraOperation.insertTweets(batch)}
-    println(s"consumed batch into cassandra ::::::::::: ${batch.length}         ${batch.apply(0)}")
   }
-
-  private def hasNext(it: ConsumerIterator[Array[Byte], Array[Byte]]): Boolean =
-    try
-      it.hasNext()
-    catch {
-      case timeOutEx: ConsumerTimeoutException =>
-        println("Getting time out  when reading message :::::::::::::: ")
-        false
-      case ex: Exception =>
-        println("Getting error when reading message :::::::::::::::::  ", ex)
-        false
-    }
 
 }
 
-import scala.concurrent.duration.DurationInt
-
 case object GiveMeWork
 
-class KafkaMessageConsumer(consumer: KafkaConsumer) extends Actor  {
+class KafkaMessageConsumerActor(consumer: KafkaMessageConsumer) extends Actor  {
 
-  implicit val dispatcher = context.dispatcher
+  implicit val dispatcher: ExecutionContextExecutor = context.dispatcher
 
-  val initialDelay = 1000 milli
-  val interval = 1 seconds
+  val initialDelay: FiniteDuration = 1000.milli
+  val interval: FiniteDuration = 1.seconds
 
 
   context.system.scheduler.schedule(initialDelay, interval, self, GiveMeWork)
 
-  def receive: PartialFunction[Any, Unit] = {
-
-    case GiveMeWork => consumer.read
+  def receive: Receive = {
+    case GiveMeWork => consumer.readAndProcess()
   }
 
 }
@@ -89,7 +62,7 @@ object CassandraKafkaConsumer extends App {
 
   val actorSystem = ActorSystem("KafkaActorSystem")
 
-  val consumer = actorSystem.actorOf(Props(new KafkaMessageConsumer(new KafkaConsumer)))
+  val consumer = actorSystem.actorOf(Props(new KafkaMessageConsumerActor(new KafkaMessageConsumer)))
 
   consumer ! GiveMeWork
 
